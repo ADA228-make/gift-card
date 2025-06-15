@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Tarifs cartes cadeaux & IPTV</title>
+  <style>
+    body {
+      background-color: #121212;
+      color: #ffffff;
+      font-family: 'Segoe UI', sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+    h1 {
+      color: #00ffae;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 30px;
+    }
+    th, td {
+      padding: 12px;
+      border: 1px solid #444;
+    }
+    th {
+      background-color: #1e1e1e;
+    }
+    .note {
+      margin-top: 20px;
+      font-size: 0.9em;
+      color: #bbbbbb;
+    }
+    .btn {
+      background-color: #00ffae;
+      color: #121212;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      margin: 10px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .btn:hover {
+      background-color: #00e69c;
+    }
+  </style>
+</head>
+<body>
+  <h1>Tarifs cartes cadeaux & IPTV</h1>
+  <p>Taux actualisés automatiquement 💱</p>
+
+  <!-- Ajout du bouton de rafraîchissement -->
+  <button class="btn" onclick="chargerTaux()">🔄 Mettre à jour les taux</button>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Montant</th>
+        <th>Devise</th>
+        <th>Prix Dundle</th>
+        <th>Frais Dundle</th>
+        <th>Marge</th>
+        <th>Prix total en FCFA</th>
+      </tr>
+    </thead>
+    <tbody id="tarifs"></tbody>
+  </table>
+
+  <p class="note">Les prix varient selon le taux de change. Mis à jour automatiquement.</p>
+
+  <!-- Bouton WhatsApp -->
+  <a href="https://wa.me/228xxxxxxxxx" target="_blank">
+    <button class="btn">📱 Commander sur WhatsApp</button>
+  </a>
+
+  <script>
+    const cartes = [
+      { montant: 10, devise: "EUR", frais: 0.99, marge: 1500 },
+      { montant: 10, devise: "USD", frais: 0.99, marge: 1500 },
+      { montant: 20, devise: "EUR", frais: 1.19, marge: 2500 },
+      { montant: 20, devise: "USD", frais: 1.19, marge: 2500 },
+      { montant: 50, devise: "EUR", frais: 1.49, marge: 3000 },
+      { montant: 50, devise: "USD", frais: 1.49, marge: 3000 },
+      { montant: 60, devise: "EUR", frais: 1.59, marge: 3500 },
+      { montant: 80, devise: "USD", frais: 1.79, marge: 3500 },
+      { montant: 100, devise: "EUR", frais: 1.99, marge: 4000 },
+      { montant: 100, devise: "USD", frais: 1.99, marge: 4000 },
+      { montant: 150, devise: "EUR", frais: 2.49, marge: 5000 },
+      { montant: 150, devise: "USD", frais: 2.49, marge: 5000 },
+      { montant: 200, devise: "EUR", frais: 2.99, marge: 6000 },
+      { montant: 200, devise: "USD", frais: 2.99, marge: 6000 },
+      { montant: 250, devise: "EUR", frais: 3.49, marge: 7000 },
+      { montant: 250, devise: "USD", frais: 3.49, marge: 7000 }
+    ];
+
+    async function chargerTaux() {
+      const tbody = document.getElementById("tarifs");
+      tbody.innerHTML = ""; // Réinitialiser
+
+      try {
+        const res = await fetch("https://v6.exchangerate-api.com/v6/3845ab248dd9b476a9032cfe/latest/EUR"); // Remplace par clé perso
+        const data = await res.json();
+
+        const eurToXof = data.conversion_rates["XOF"];
+        const eurToUsd = data.conversion_rates["USD"];
+        const usdToXof = eurToXof / eurToUsd;
+
+        cartes.forEach(carte => {
+          const totalDevise = carte.montant + carte.frais;
+          const taux = carte.devise === "EUR" ? eurToXof : usdToXof;
+          const totalFCFA = Math.round(totalDevise * taux + carte.marge);
+
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${carte.montant} ${carte.devise}</td>
+            <td>${carte.devise}</td>
+            <td>${carte.montant.toFixed(2)} ${carte.devise}</td>
+            <td>${carte.frais.toFixed(2)} ${carte.devise}</td>
+            <td>${carte.marge.toLocaleString()} FCFA</td>
+            <td><strong>${totalFCFA.toLocaleString()} FCFA</strong></td>
+          `;
+          tbody.appendChild(tr);
+        });
+
+      } catch (err) {
+        tbody.innerHTML = "<tr><td colspan='6'>❌ Erreur de chargement des taux. Vérifie ta connexion ou API Key.</td></tr>";
+        console.error("Erreur de chargement :", err);
+      }
+    }
+
+    chargerTaux();
+  </script>
+</body>
+</html>
+
